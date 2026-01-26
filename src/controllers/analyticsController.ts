@@ -515,3 +515,48 @@ export const getCourseStudents = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to fetch list" });
   }
 };
+
+export const getAllCertificates = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string || "";
+    const offset = (page - 1) * limit;
+
+    // Base Query
+    let query = `FROM course_certifications`;
+    let params: any[] = [];
+
+    // Add Search Logic
+    if (search) {
+      query += ` WHERE certificate_name LIKE ? OR email_address LIKE ? OR course_name LIKE ?`;
+      const term = `%${search}%`;
+      params = [term, term, term];
+    }
+
+    // 1. Get Total Count (for pagination)
+    const [countResult] = await db.query<any[]>(`SELECT COUNT(*) as total ${query}`, params);
+    const total = countResult[0].total;
+
+    // 2. Get Data
+    const sql = `SELECT * ${query} ORDER BY survey_created_at DESC LIMIT ? OFFSET ?`;
+    // Add limit/offset to params
+    params.push(limit, offset);
+
+    const [rows] = await db.query(sql, params);
+
+    res.json({
+      data: rows,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
+
+  } catch (error) {
+    console.error("Fetch All Error:", error);
+    res.status(500).json({ message: "Failed to fetch data" });
+  }
+};

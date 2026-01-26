@@ -15,7 +15,8 @@ import {
     searchStudent,
     addCertificate,
     getKpiDetails,
-    getCourseStudents
+    getCourseStudents,
+    getAllCertificates
 } from "../controllers/analyticsController.js";
 
 const analyticsRoutes = Router();
@@ -60,4 +61,6 @@ analyticsRoutes.post("/add", addCertificate);
 analyticsRoutes.get("/kpi-details", getKpiDetails);
 
 analyticsRoutes.get("/course-students", getCourseStudents);
+
+analyticsRoutes.get("/all-certificates", getAllCertificates);
 export default analyticsRoutes;
